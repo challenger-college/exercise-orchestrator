@@ -1,4 +1,24 @@
-from subprocess import run
+import time
 
-a = run(['docker', 'exec', '3ee25031d576fe555568b9a1a61b55fea14a4ff1f11dab1e34fb769151f9c00f', 'python', 'submit.py', 1, 2], capture_output=True)
-print(a.stdout)
+from web_api import *
+from python_docker import ChallengePythonDocker
+from time import sleep
+
+def main():
+    while True:
+        challenges = ChallengeParser().get_challenges()
+        for challenge in challenges:
+            current_challenge = ChallengePythonDocker(challenge.function_name, challenge.tests, challenge.parameters)
+            if current_challenge.status_code == 0:
+                print(f"Je valide le challenge {current_challenge.function_name}")
+                challenge.valid_challenge("true")
+            else:
+                print(f"Je refuse le challenge {current_challenge.function_name}")
+                challenge.valid_challenge("false")
+        time.sleep(1)
+
+
+
+
+if __name__ == "__main__":
+    main()

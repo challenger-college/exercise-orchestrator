@@ -3,7 +3,7 @@ from random import randint
 
 class TestInjector:
 
-    def __init__(self, function_name, tests, file="submit.py"):
+    def __init__(self, function_name, tests, file):
         self.success_code = str(randint(0, 10**9))
         self.tests = tests
         self.file = file
@@ -35,6 +35,25 @@ class TestInjector:
         if len(args) == 1:
             return str(args[0])
         return ", ".join(args)
+
+class ChallengeInjector(TestInjector):
+
+    def __init__(self, function_name, tests, file):
+        super().__init__(function_name, tests, file)
+
+    def add_tests(self):
+        self.add_sys_import()
+        for test in self.tests:
+            code = ["",
+                    f"result = {self.function_name}({self.get_format_args(test[0])})",
+                    f"if result != {test[1]}:",
+                    f"    pass",
+                    ]
+            self.write(code)
+        end = [f"print({self.success_code})", "exit(0)"]
+        self.write(end)
+        return self.success_code
+
 
 if __name__ == "__main__":
     my_test = [
