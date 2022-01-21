@@ -16,6 +16,7 @@ class TestPythonDocker:
         self.tests = tests
         self.code = code
         self.status_code = 0
+        self.error = None
 
         self.run_container(image)
         self.generate_file()
@@ -54,10 +55,16 @@ class TestPythonDocker:
         run_command = run(command, capture_output=True)
         if run_command.returncode == 0 and self.get_last_print(
                 run_command.stdout) == self.success_code:
+            self.status_code = 0
+            self.error = None
             return f"Success {time() - start}ms"
         elif run_command.returncode == 1:
+            self.status_code = 1
+            self.error = self.decode_stdout(run_command.stderr)
             return f"Error : {self.decode_stdout(run_command.stderr)}"
         else:
+            self.status_code = 1
+            self.error = f"Error : votre code ne nous permet pas d'executer nos tests."
             return f"Error : votre code ne nous permet pas d'executer nos tests."
 
     def is_running(self):
