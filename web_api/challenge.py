@@ -21,7 +21,7 @@ class Challenge:
         params = {"token": "API_TEST", "template": self.get_template(),
                   "isValid": validity}
         request = RequestVerification.post_request(
-            f"http://localhost:8000/api/challenge/{self.id}/check",
+            f"http://{IP}/api/challenge/{self.id}/check",
             params=params)
         if request == 0:
             return
