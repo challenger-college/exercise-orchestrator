@@ -8,7 +8,7 @@ class RequestVerification:
         if request.ok:
             return 1
         elif 400 <= request.status_code < 500:
-            raise Exception(request.json())
+            raise Exception(f"Error with code : {request.status_code}")
         else:
             raise Exception("Error with the request")
 
