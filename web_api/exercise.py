@@ -3,8 +3,8 @@ import os
 from web_api.requests_api import RequestVerification
 from dotenv import load_dotenv
 
-
 load_dotenv(".env")
+
 IP = os.getenv("IP_WEBSERVICE")
 TOKEN = os.getenv("API_TOKEN")
 
@@ -30,7 +30,7 @@ class Exercise:
 class ExerciseParser:
 
     def __init__(self, ip="localhost:8000"):
-        self.endpoint = f"http://{IP}/api/exercises/"
+        self.endpoint = f"http://{IP}/api/exercises"
         self.data = None
         self.status = 0
         self.error = None
