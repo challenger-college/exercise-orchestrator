@@ -1,8 +1,10 @@
-import time
-
-from web_api import *
-from python_docker import ChallengePythonDocker, TestPythonDocker
 from time import sleep
+from dotenv import load_dotenv
+import os
+
+from docker.python_docker import ChallengePythonDocker, TestPythonDocker
+from web_api.exercise import ExerciseParser
+from web_api.challenge import ChallengeParser
 
 
 def main():
@@ -19,11 +21,10 @@ def verify_challenges():
                                                   challenge.tests,
                                                   challenge.parameters)
         if current_challenge.status_code == 0:
-            print(f"Je valide le challenge {current_challenge.function_name}")
-            print(f"Je valide le challenge {current_challenge.function_name}")
+            print(f"Je valide le challenge {current_challenge.id}")
             challenge.valid_challenge("true")
         else:
-            print(f"Je refuse le challenge {current_challenge.function_name}")
+            print(f"Je refuse le challenge {current_challenge.id}")
             challenge.valid_challenge("false")
 
 
@@ -33,11 +34,11 @@ def verify_exercises():
         current_exercise = TestPythonDocker(exercise.function_name,
                                             exercise.code, exercise.tests)
         if current_exercise.status_code == 0:
-            print(f"Je valide l'exercice {current_exercise.function_name}")
-            exercise.valid_challenge("true")
+            print(f"Je valide l'exercice {current_exercise.id}")
+            exercise.valid_exercise("true", current_exercise.output, current_exercise.exec_time)
         else:
-            print(f"Je refuse l'exercice {current_exercise.function_name}")
-            exercise.valid_challenge("false", current_exercise.error)
+            print(f"Je refuse l'exercice {current_exercise.id}")
+            exercise.valid_exercise("false", current_exercise.output)
 
 
 if __name__ == "__main__":
