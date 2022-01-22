@@ -13,8 +13,10 @@ class RequestVerification:
             except:
                 print(f"Error during {request.status_code}: {context}", file=sys.stderr)
         else:
-            print(f"Error during {request.status_code}: {context} {request.json()}", file=sys.stderr)
-
+            try:
+                print(f"Error during {request.status_code}: {context} {request.json()}", file=sys.stderr)
+            except:
+                print(f"Error during {request.status_code}: {context}", file=sys.stderr)
     @staticmethod
     def post_request(url, params={}):
         try:

@@ -38,7 +38,7 @@ def verify_exercises():
             exercise.valid_exercise("true", current_exercise.output, current_exercise.exec_time)
         else:
             print(f"Je refuse l'exercice {current_exercise.function_name}")
-            exercise.valid_exercise("false", current_exercise.output)
+            exercise.valid_exercise("false", current_exercise.output, current_exercise.exec_time)
 
 
 if __name__ == "__main__":
