@@ -1,9 +1,8 @@
 import os
-from dotenv import load_dotenv
 
 from web_api.requests_api import RequestVerification
 
-load_dotenv(".env")
+import var_env
 IP = os.getenv("IP_WEBSERVICE")
 TOKEN = os.getenv("API_TOKEN")
 

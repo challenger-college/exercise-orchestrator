@@ -34,10 +34,10 @@ def verify_exercises():
         current_exercise = TestPythonDocker(exercise.function_name,
                                             exercise.code, exercise.tests)
         if current_exercise.status_code == 0:
-            print(f"Je valide l'exercice {current_exercise.function_name}")
+            print(f"Je valide l'exercice {current_exercise.function_name} exec time {current_exercise.exec_time}")
             exercise.valid_exercise("true", current_exercise.output, current_exercise.exec_time)
         else:
-            print(f"Je refuse l'exercice {current_exercise.function_name}")
+            print(f"Je refuse l'exercice {current_exercise.function_name} exec time {current_exercise.exec_time}")
             exercise.valid_exercise("false", current_exercise.output, current_exercise.exec_time)
 
 

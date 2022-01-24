@@ -1,25 +1,26 @@
 import os
 
 from web_api.requests_api import RequestVerification
-from dotenv import load_dotenv
-
-load_dotenv(".env")
+import var_env
 
 IP = os.getenv("IP_WEBSERVICE")
 TOKEN = os.getenv("API_TOKEN")
 
+
 class Exercise:
-    def __init__(self, code, function_name, tests, exercise_id, timeout):
+    def __init__(self, code, function_name, tests, exercise_id, timeout, token):
         self.id = exercise_id
         self.function_name = function_name
         self.tests = tests
         self.code = code
         self.timeout = timeout
+        self.token = token
 
     def valid_exercise(self, validity, error=None, time=None):
         request = RequestVerification.post_request(
-            f"http://{IP}/api/exercise/{self.id}/check",
-            params={"token": "API_TEST", "isValid": validity, "output": error, "time": time})
+            f"http://{IP}/api/exercise/{self.id}/check/{self.token}",
+            params={"token": "API_TEST", "isValid": validity, "output": error,
+                    "time": time})
         if request == 0:
             return
         context = f"send exercise status to API  ({self.id})"
@@ -53,12 +54,13 @@ class ExerciseParser:
             exercises = []
             for exercise in self.data:
                 id = exercise.get("id")
+                token = exercise.get("token")
                 function_name = exercise.get("challenge").get("function_name")
                 timeout = exercise.get("challenge").get("timeout")
                 code = exercise.get("content")
                 tests = self.get_tests(exercise.get("challenge").get("tests"))
                 exercises.append(
-                    Exercise(code, function_name, tests, id, timeout))
+                    Exercise(code, function_name, tests, id, timeout, token))
             return exercises
         return []
 

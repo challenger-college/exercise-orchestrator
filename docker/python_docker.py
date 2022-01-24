@@ -58,15 +58,17 @@ class TestPythonDocker:
                 run_command.stdout) == self.success_code:
             self.status_code = 0
             self.output = f"Sucess"
-            self.exec_time = time() - start
+            self.exec_time = (time() - start) * 1000
             return f"Success {time() - start}ms"
         elif run_command.returncode == 1:
             self.status_code = 1
             self.output = self.decode_stdout(run_command.stderr)
+            self.exec_time = (time() - start) * 1000
             return f"Error : {self.decode_stdout(run_command.stderr)}"
         else:
             self.status_code = 1
             self.output = f"Error : votre code ne nous permet pas d'executer nos tests."
+            self.exec_time = (time() - start) * 1000
             return f"Error : votre code ne nous permet pas d'executer nos tests."
 
     def is_running(self):
