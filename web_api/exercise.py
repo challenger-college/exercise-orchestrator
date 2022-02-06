@@ -30,7 +30,7 @@ class Exercise:
 
 class ExerciseParser:
 
-    def __init__(self, ip="localhost:8000"):
+    def __init__(self):
         self.endpoint = f"http://{IP}/api/exercises"
         self.data = None
         self.status = 0

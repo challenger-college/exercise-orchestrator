@@ -1,3 +1,4 @@
+import sys
 from subprocess import run
 from time import time
 
@@ -22,22 +23,27 @@ class TestPythonDocker:
         self.run_container(image)
         self.generate_file()
         self.copy_file_in_container()
+        if self.is_valid_syntax():
+            self.inject_tests()
+            self.copy_file_in_container()
+            self.execute_tests()
         self.delete_file()
-        self.execute_tests()
-
 
     def run_container(self, image):
         container = run(["docker", "run", "-d", image],
                         capture_output=True)
         if container.returncode == 0:
-            self.id = self.decode_stdout(container.stdout)
+            self.id = self.decode_bytes(container.stdout)
             self.submit_file = f"{self.id}.py"
         else:
-            raise Exception(f"Error while running container : {self.decode_stdout(container.stderr)}")
+            raise Exception(
+                f"Error while running container : {self.decode_bytes(container.stderr)}")
 
     def generate_file(self):
         with open(self.submit_file, "w") as file:
             file.write(self.code)
+
+    def inject_tests(self):
         self.success_code = TestInjector(self.function_name, self.tests,
                                          self.submit_file).add_tests()
 
@@ -45,48 +51,75 @@ class TestPythonDocker:
         delete_command = run(["rm", self.submit_file], capture_output=True)
 
     def copy_file_in_container(self):
-        copy = run(["docker", "cp", self.submit_file, f"{self.id}:/app"],
+        copy = run(["docker", "cp", self.submit_file, f"{self.id}:/main.py"],
                    capture_output=True)
         if copy.returncode != 0:
-            raise Exception(f"Error while copy of the file : {self.decode_stdout(copy.stderr)}")
+            raise Exception(
+                f"Error while copy of the file : {self.decode_bytes(copy.stderr)}")
+
+    def is_valid_syntax(self):
+        run_file = run(["docker", "exec", self.id, "python", "main.py"],
+                       capture_output=True)
+        if run_file.returncode != 0:
+            self.status_code = 1
+            self.output = self.decode_bytes(run_file.stderr)
+            return False
+        return True
 
     def execute_tests(self):
-        start = time()
-        command = ["docker", "exec", self.id, "python", self.submit_file]
+        command = ["docker", "exec", self.id, "python", "main.py"]
         run_command = run(command, capture_output=True)
-        if run_command.returncode == 0 and self.get_last_print(
-                run_command.stdout) == self.success_code:
+
+        std_out = self.decode_bytes(run_command.stdout)
+        std_err = self.decode_bytes(run_command.stderr)
+        code_validity = self.random_code_is_valid(std_out)
+        if run_command.returncode == 0 and code_validity:
+            self.exec_time = float(self.get_line_from_end(std_out, 1))
             self.status_code = 0
-            self.output = f"Sucess"
-            self.exec_time = (time() - start) * 1000
-            return f"Success {time() - start}ms"
-        elif run_command.returncode == 1:
+            self.output = "Bravo, vous avez reussi le challenge !"
+        elif run_command.returncode == 0 and not code_validity:
+            self.output = "Erreur, votre code ne nous permet d'executer nos tests"
             self.status_code = 1
-            self.output = self.decode_stdout(run_command.stderr)
-            self.exec_time = (time() - start) * 1000
-            return f"Error : {self.decode_stdout(run_command.stderr)}"
-        else:
+        elif run_command.returncode == 1 and code_validity:
+            if self.get_line_from_end(std_err, 0) == "3":
+                self.output = self.get_line_from_end(std_err, 1)
+                self.status_code = 1
+            else:
+                self.output = std_err
+                self.status_code = 1
+        elif run_command.returncode == 1 and not code_validity:
+            self.output = "Erreur, votre code ne nous permet d'executer nos tests"
             self.status_code = 1
-            self.output = f"Error : votre code ne nous permet pas d'executer nos tests."
-            self.exec_time = (time() - start) * 1000
-            return f"Error : votre code ne nous permet pas d'executer nos tests."
+        elif run_command.returncode == 137:
+            self.status_code = 1
+            self.output = "Temps dépassé, votre script est trop lent..."
 
     def is_running(self):
         status = run(["docker", "inspect", self.id,
                       "--format={{.State.Status}}"],
                      capture_output=True)
-        result = self.decode_stdout(status.stdout)
+        result = self.decode_bytes(status.stdout)
         return result == "running"
 
-    def get_last_print(self, string):
-        string = self.decode_stdout(string)
-        index = len(string) - 1
-        while string[index] != "\n" and index != -1:
-            index -= 1
-        return string[index + 1: len(string)]
+    def random_code_is_valid(self, string):
+        return self.get_line_from_end(string, 0) == str(self.success_code)
 
     @staticmethod
-    def decode_stdout(bytes):
+    def get_lines_except_lines_from_end(string, line_number):
+        lines = string.splitlines()
+        return lines[:-line_number]
+
+    @staticmethod
+    def get_line_from_end(string, line_number):
+        lines = string.splitlines()
+        if len(lines) == 0 or line_number >= len(lines):
+            return ""
+        else:
+            lines.reverse()
+            return lines[line_number]
+
+    @staticmethod
+    def decode_bytes(bytes):
         return bytes.decode("UTF-8").strip("\n")
 
 
@@ -110,17 +143,17 @@ class ChallengePythonDocker(TestPythonDocker):
 
     def execute_tests(self):
         result = super().execute_tests()
-        if result[0] == "E":
-            self.status_code = 1
-            return "Challenge is not valid."
-        else:
-            self.status_code = 0
-            return "Challenge is valid."
-
+        self.status_code = 0
+        return
+        # if result[0] == "E":
+        #     self.status_code = 1
+        #     return "Challenge is not valid."
+        # else:
+        #     self.status_code = 0
+        #     return "Challenge is valid."
 
     @staticmethod
     def get_format_parameters(parameters):
         if len(parameters) == 1:
             return str(parameters[0])
         return ", ".join(parameters)
-

@@ -1,4 +1,4 @@
 FROM python:latest
-WORKDIR /app
-COPY ../loop.py /app
+WORKDIR /
+COPY ./loop.py /
 CMD ["python", "loop.py"]
