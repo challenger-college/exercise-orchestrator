@@ -1,15 +1,18 @@
-import sys
+import os
 from subprocess import run
 from time import time
 
 from test_injectors.python_injector import TestInjector, ChallengeInjector
 
+CONTAINER_TIME_OUT = os.getenv("CONTAINER_TIME_OUT")
+
 
 class TestPythonDocker:
 
     def __init__(self, function_name, code, tests,
-                 image="challenger_python_docker",
+                 image="challenger_python",
                  ):
+        CONTAINER_TIME_OUT = os.getenv("CONTAINER_TIME_OUT")
         self.id = None
         self.success_code = None
         self.submit_file = None
@@ -30,7 +33,8 @@ class TestPythonDocker:
         self.delete_file()
 
     def run_container(self, image):
-        container = run(["docker", "run", "-d", image],
+        CONTAINER_TIME_OUT = os.getenv("CONTAINER_TIME_OUT")
+        container = run(["docker", "run", "-d", "--env", f"CONTAINER_TIME_OUT={CONTAINER_TIME_OUT}", image],
                         capture_output=True)
         if container.returncode == 0:
             self.id = self.decode_bytes(container.stdout)
@@ -67,12 +71,16 @@ class TestPythonDocker:
         return True
 
     def execute_tests(self):
+        if not self.is_running():
+            self.status_code = 1
+            self.output = "Temps dépassé, votre script est trop lent..."
         command = ["docker", "exec", self.id, "python", "main.py"]
         run_command = run(command, capture_output=True)
 
         std_out = self.decode_bytes(run_command.stdout)
         std_err = self.decode_bytes(run_command.stderr)
         code_validity = self.random_code_is_valid(std_out)
+
         if run_command.returncode == 0 and code_validity:
             self.exec_time = float(self.get_line_from_end(std_out, 1))
             self.status_code = 0

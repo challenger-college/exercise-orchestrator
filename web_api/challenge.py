@@ -1,10 +1,11 @@
 import os
 
 from web_api.requests_api import RequestVerification
+from variables_env import load_environment_variable, get_token_api, get_web_service_ip
 
-import var_env
-IP = os.getenv("IP_WEBSERVICE")
-TOKEN = os.getenv("API_TOKEN")
+load_environment_variable()
+IP = get_web_service_ip()
+TOKEN = get_token_api()
 
 
 class Challenge:
@@ -41,8 +42,8 @@ class Challenge:
 
 class ChallengeParser:
 
-    def __init__(self, ip="localhost:8000"):
-        self.endpoint = f"http://{ip}/api/challenges"
+    def __init__(self):
+        self.endpoint = f"http://{IP}/api/challenges"
         self.data = None
         self.status = 0
         self.error = None

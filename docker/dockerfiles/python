@@ -1,0 +1,4 @@
+FROM python:latest
+WORKDIR /
+COPY ./docker/dockerfiles/timeout.sh /
+CMD ["bash", "timeout.sh"]

@@ -1,5 +1,5 @@
-import sys
 import requests
+import logging
 
 
 class RequestVerification:
@@ -7,23 +7,13 @@ class RequestVerification:
     @staticmethod
     def verify(request, context):
         if request.ok:
-            return 1
-        elif 400 <= request.status_code < 500:
-            try:
-                print(
-                    f"Error during {request.status_code}: {context} : {request.json()} ",
-                    file=sys.stderr)
-            except:
-                print(f"Error during {request.status_code}: {context}",
-                      file=sys.stderr)
+            return True
         else:
             try:
-                print(
-                    f"Error during {request.status_code}: {context} {request.json()}",
-                    file=sys.stderr)
+                logging.error(
+                    f"Unable to connect to the Web API [{request.status_code}]: {context} {request.json()}.")
             except:
-                print(f"Error during {request.status_code}: {context}",
-                      file=sys.stderr)
+                logging.error(f"Unable to connect to the Web API [{request.status_code}]: {context}.")
 
     @staticmethod
     def post_request(url, params={}):
@@ -31,9 +21,8 @@ class RequestVerification:
             request = requests.post(url=url, params=params)
             return request
         except:
-            print(
-                "Error during connection with web api, please verify his status",
-                file=sys.stderr)
+            logging.error(
+                "Unable to connect to the Web API, please check its status.")
             return 0
 
     @staticmethod
@@ -42,7 +31,6 @@ class RequestVerification:
             request = requests.get(url=url, params=params)
             return request
         except:
-            print(
-                "Error during connection with web api, please verify his status",
-                file=sys.stderr)
+            logging.error(
+                "Unable to connect to the Web API, please check its status.")
         return 0

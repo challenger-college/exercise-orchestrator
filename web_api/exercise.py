@@ -1,13 +1,15 @@
 import os
 
 from web_api.requests_api import RequestVerification
-import var_env
+from variables_env import load_environment_variable, get_token_api, get_web_service_ip
 
-IP = os.getenv("IP_WEBSERVICE")
-TOKEN = os.getenv("API_TOKEN")
+load_environment_variable()
+IP = get_web_service_ip()
+TOKEN = get_token_api()
 
 
 class Exercise:
+
     def __init__(self, code, function_name, tests, exercise_id, timeout, token):
         self.id = exercise_id
         self.function_name = function_name
@@ -31,10 +33,13 @@ class Exercise:
 class ExerciseParser:
 
     def __init__(self):
+        IP = os.environ.get("IP_WEBSERVICE")
+        TOKEN = os.environ.get("API_TOKEN")
         self.endpoint = f"http://{IP}/api/exercises"
         self.data = None
         self.status = 0
         self.error = None
+
 
     def is_valid_status(self):
         return self.status == 0
