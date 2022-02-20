@@ -76,7 +76,6 @@ class ChallengeParser:
 
     @staticmethod
     def get_tests(tests):
-
         format_tests = []
         for test in tests:
             format_test = [[]]

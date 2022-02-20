@@ -33,13 +33,10 @@ class Exercise:
 class ExerciseParser:
 
     def __init__(self):
-        IP = os.environ.get("IP_WEBSERVICE")
-        TOKEN = os.environ.get("API_TOKEN")
         self.endpoint = f"http://{IP}/api/exercises"
         self.data = None
         self.status = 0
         self.error = None
-
 
     def is_valid_status(self):
         return self.status == 0
