@@ -1,8 +1,6 @@
 import subprocess
 
-
-class DockerException(Exception):
-    pass
+from docker.utils import get_format_std, DockerException
 
 
 class ContainerDocker:
@@ -23,20 +21,6 @@ class ContainerDocker:
         self.id = None
         self.command_timeout = command_timeout
 
-    @staticmethod
-    def _get_format_std(stream: bytes) -> str:
-        """
-        Format stderr or stdout stream into a string with trailing whitespace
-        removed.
-
-        Args:
-            stream (bytes): Stdout or stderr stream.
-
-        Returns:
-            str: Format string with trailing whitespace.
-        """
-        return stream.decode("utf-8").rstrip()
-
     def run(self, options: dict = None) -> str:
         """
         Run a docker container with variables environment and options.
@@ -53,7 +37,7 @@ class ContainerDocker:
                 the container.
         """
         if self.is_running():
-            DockerException("Container is already running.")
+            raise DockerException("Container is already running.")
         process_command = ["docker", "run", "-d"]
         if self.env is not None and isinstance(self.env, dict):
             if len(self.env) > 0:
@@ -70,12 +54,12 @@ class ContainerDocker:
             process = subprocess.run(process_command, capture_output=True,
                                      timeout=self.command_timeout)
             if process.returncode != 0:
-                raise DockerException(self._get_format_std(process.stderr))
+                raise DockerException(get_format_std(process.stderr))
             else:
-                self.id = self._get_format_std(process.stdout)
+                self.id = get_format_std(process.stdout)
                 return self.id
         except subprocess.TimeoutExpired:
-            DockerException("Command time out expired.")
+            raise DockerException("Command time out expired.")
 
     def kill(self) -> bool:
         """
@@ -90,17 +74,17 @@ class ContainerDocker:
 
         """
         if not self.is_running():
-            return True
+            raise DockerException("Container is not running.")
         else:
             process_command = ["docker", "kill", self.id]
             try:
                 process = subprocess.run(process_command, capture_output=True,
                                          timeout=self.command_timeout)
                 if process.returncode != 0:
-                    DockerException(self._get_format_std(process.stderr))
+                    raise DockerException(get_format_std(process.stderr))
                 return True
             except subprocess.TimeoutExpired:
-                DockerException("Command time out expired.")
+                raise DockerException("Command time out expired.")
 
     def is_running(self) -> bool:
         """
@@ -123,11 +107,11 @@ class ContainerDocker:
                 process = subprocess.run(process_command, capture_output=True,
                                          timeout=self.command_timeout)
                 if process.returncode != 0:
-                    raise DockerException(self._get_format_std(process.stderr))
+                    raise DockerException(get_format_std(process.stderr))
                 else:
-                    return self._get_format_std(process.stdout) == "running"
+                    return get_format_std(process.stdout) == "running"
             except subprocess.TimeoutExpired:
-                DockerException("Command time out expired.")
+                raise DockerException("Command time out expired.")
 
     def exec_command(self, command: list) -> dict:
         """
@@ -151,8 +135,8 @@ class ContainerDocker:
         process = subprocess.run(process_command, capture_output=True)
         command_state = {
             "returncode": process.returncode,
-            "stderr": self._get_format_std(process.stderr),
-            "stdout": self._get_format_std(process.stdout)
+            "stderr": get_format_std(process.stderr),
+            "stdout": get_format_std(process.stdout)
         }
         return command_state
 
@@ -179,16 +163,8 @@ class ContainerDocker:
             process = subprocess.run(process_command, capture_output=True,
                                      timeout=self.command_timeout)
             if process.returncode != 0:
-                raise DockerException(self._get_format_std(process.stderr))
+                raise DockerException(get_format_std(process.stderr))
             return True
         except subprocess.TimeoutExpired:
-            DockerException("Command time out expired.")
+            raise DockerException("Command time out expired.")
 
-
-if __name__ == "__main__":
-    test = ContainerDocker("test_challenger_python", {"CONTAINER_TIME_OUT": 60})
-    test.run(options={"--network": "none"})
-    test.copy_file("/home/tomy/Desktop/dev/code_platform/refactor/docker/test.py")
-    test.copy_file("/home/tomy/Desktop/dev/code_platform/refactor/docker/dockerfiles/bidule.py")
-    r = test.exec_command(["python", "bidule.py"])
-    print(r)

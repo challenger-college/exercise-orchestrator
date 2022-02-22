@@ -1,6 +1,6 @@
 FROM python:latest
 WORKDIR /
-COPY ./timeout.sh /
+COPY ./dockerfiles/timeout.sh /
 RUN useradd -u 1234 challenger-user
 USER challenger-user
 CMD ["bash", "timeout.sh"]
