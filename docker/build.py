@@ -1,8 +1,8 @@
 import logging
 import subprocess
 
-from docker.utils import get_format_std, DockerException, \
-    has_valid_docker_installation
+from docker.utils import DockerException, has_valid_docker_installation
+from utils import get_format_std
 
 IMAGES = {
     "python": "challenger_python"

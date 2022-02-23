@@ -1,6 +1,7 @@
 import subprocess
 
-from docker.utils import get_format_std, DockerException
+from docker.utils import DockerException
+from utils import get_format_std
 
 
 class ContainerDocker:
