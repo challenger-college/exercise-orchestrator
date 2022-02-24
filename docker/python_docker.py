@@ -1,7 +1,7 @@
 from subprocess import run
 from time import time
 
-from test_injectors.python_injector import TestInjector, ChallengeInjector
+from test_injectors.python_injector import I, ChallengeInjector
 
 
 class TestPythonDocker:
@@ -38,7 +38,7 @@ class TestPythonDocker:
     def generate_file(self):
         with open(self.submit_file, "w") as file:
             file.write(self.code)
-        self.success_code = TestInjector(self.function_name, self.tests,
+        self.success_code = I(self.function_name, self.tests,
                                          self.submit_file).add_tests()
 
     def delete_file(self):

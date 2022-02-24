@@ -1,38 +1,19 @@
-import sys
-import requests
-
+import sys;import requests
 class RequestVerification:
-
     @staticmethod
-    def verify(request, context):
-        if request.ok:
-            return 1
-        elif 400 <= request.status_code < 500:
-            try:
-                print(f"Error during {request.status_code}: {context} : {request.json()} ", file=sys.stderr)
-            except:
-                print(f"Error during {request.status_code}: {context}", file=sys.stderr)
+    def verify(r,c):
+        if r.ok:return 1
+        elif 400<=r.status_code<500:
+            try:print(f"Error during {r.status_code}: {c} : {r.json()} ",file=sys.stderr)
+            except:print(f"Error during {r.status_code}: {c}",file=sys.stderr)
         else:
-            try:
-                print(f"Error during {request.status_code}: {context} {request.json()}", file=sys.stderr)
-            except:
-                print(f"Error during {request.status_code}: {context}", file=sys.stderr)
+            try:print(f"Error during {r.status_code}: {c} {r.json()}",file=sys.stderr)
+            except:print(f"Error during {r.status_code}: {c}",file=sys.stderr)
     @staticmethod
-    def post_request(url, params={}):
+    def post_request(u,p={}):
         try:
-            request = requests.post(url=url, params=params)
-            return request
+            r=requests.post(url=u,params=p);return r
         except:
-            print(
-                "Error during connection with web api, please verify his status",
-                file=sys.stderr)
-            return 0
-
+            print("Error during connection with web api, please verify his status",file=sys.stderr);return 0
     @staticmethod
-    def get_request(url, params={}):
-        request = requests.get(url=url, params=params)
-        return request
-        print(
-            "Error during connection with web api, please verify his status",
-            file=sys.stderr)
-        return 0
+    def get_request(u,p={}):r=requests.get(url=u,params=p);return r;print("Error during connection with web api, please verify his status",file=sys.stderr);return 0

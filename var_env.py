@@ -1,8 +1,4 @@
-from dotenv import load_dotenv
-from pathlib import Path
-
-import sys
-
+from dotenv import load_dotenv;from pathlib import Path;import sys
 if Path(".env.local").is_file():
     load_dotenv(".env.local")
 elif Path(".env").is_file():
